@@ -29,7 +29,6 @@ def get_video():
             print(f"id: {id}, titulo: {titulo}, descricao: {descricao}, url: {url}")
             video = {'id':id, 'titulo':titulo,'descricao':descricao,'url':url}
             lista_videos.append(video)
-        conn.close()
         return lista_videos
     except mariadb.Error as e: 
         conn.close()
@@ -44,7 +43,6 @@ def get_video_by_id(id_recebido):
         for (id, titulo, descricao, url) in cur:
             print(f"id: {id}, titulo: {titulo}, descricao: {descricao}, url: {url}")
             video = {'id':id, 'titulo':titulo,'descricao':descricao,'url':url}
-        conn.close()
         return video
     except mariadb.Error as e: 
         conn.close()
@@ -54,10 +52,29 @@ def inserir_video(titulo, descricao, url):
     try: 
         cur.execute(f"INSERT INTO videos (titulo,descricao,url) VALUES ('{str(titulo)}',\
         '{str(descricao)}','{str(url)}')") 
-        return {'mensagem':'Filme cadastrado com sucesso!'}
+        conn.commit()
+        return {'mensagem':'Video cadastrado com sucesso!'}
     except mariadb.Error as e: 
         conn.close()
         return {'mensagem':f"Error: {e}"}
 
-conn.commit()
+def atualizar_video(id, titulo, descricao, url):
+    try: 
+        cur.execute(f"UPDATE LOW_PRIORITY videos SET titulo = '{str(titulo)}',\
+            descricao = '{str(descricao)}', url = '{str(url)}' WHERE id = {str(id)}")
+        conn.commit()
+        return {'mensagem':'Video atualizado com sucesso!'}
+    except mariadb.Error as e: 
+        conn.close()
+        return {'mensagem':f"Error: {e}"}
+
+    
+def deletar_video(id):
+    try: 
+        cur.execute(f"DELETE LOW_PRIORITY FROM videos WHERE id = {str(id)}")
+        conn.commit()
+        return {'mensagem':'Video atualizado com sucesso!','deletado':True}
+    except mariadb.Error as e: 
+        conn.close()
+        return {'mensagem':f"Error: {e}", 'deletado':False}
 
